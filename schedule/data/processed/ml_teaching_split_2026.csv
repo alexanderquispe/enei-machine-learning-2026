@@ -1,0 +1,21 @@
+date,weekday,course,notes,owner,note,session_number
+2026-09-07,Monday,ML I,"18:00 - 19:00 EEA: Metodología, Microdatos y diccionarios de variables, innovaciones, retos | 19:00 -22:00 Curso",instructor,,1
+2026-09-09,Wednesday,ML I,18:00 - 19:00 Lecturas recomendadas y /o tareas asignadas por los docentes. Proyecto Integrador | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 1 - Python (19:00-22:00),2
+2026-09-11,Friday,ML I,"18:00 - 19:00  ENCAL:  Metodología, Microdatos y diccionarios de variables | 19:00 -22:00 Curso",instructor,,3
+2026-09-14,Monday,ML I,"18:00 - 19:00 MUESTREO: Metodología, innovaciones, retos | 19:00 -22:00 Curso",instructor,,4
+2026-09-16,Wednesday,ML I,"18:00 - 19:00 CARTOGRAFÍA:  Metodología, técnicas, retos, innovaciones | 19:00 -22:00 Curso",assistant,Cruce PUCP: Clase 3 - Python (19:00-22:00),5
+2026-09-18,Friday,ML I,"18:00 - 19:00 RENAMU, metodología, innovaciones, retos | 19:00 -22:00 Curso",instructor,,6
+2026-09-21,Monday,ML I,"18:00 - 19:00 ENCAL, metodología, innovaciones, retos | 19:00 -22:00 Curso",instructor,,7
+2026-09-23,Wednesday,ML I,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 5 - Python (19:00-22:00),8
+2026-09-28,Monday,ML I,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,9
+2026-09-30,Wednesday,ML I,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 6 - Python (19:00-21:00),10
+2026-10-02,Friday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,1
+2026-10-07,Wednesday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 1 - Python intermedio (19:00-22:00),2
+2026-10-09,Friday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,3
+2026-10-12,Monday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,4
+2026-10-14,Wednesday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 3 - Python intermedio (19:00-22:00),5
+2026-10-16,Friday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,6
+2026-10-19,Monday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,7
+2026-10-21,Wednesday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Cruce PUCP: Clase 5 - Python intermedio (19:00-22:00),8
+2026-10-23,Friday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,instructor,,9
+2026-10-26,Monday,ML II,18:00 - 19:00 | 19:00 -22:00 Curso,assistant,Balance de horas del JP (12 h),10
