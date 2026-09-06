@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 1 --- PyTorch: Tensors, Autograd and a First MLP}\\[4pt]
+\large Machine Learning II \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, October 7, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Move from numpy to PyTorch without losing sight of the mathematics:
+every gradient PyTorch computes today, you will first compute by hand. By the end you will have
+trained a single neuron and a two-layer network with a training loop you wrote yourself, and checked
+its gradients against \texttt{autograd}.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{homework\_1\_code.ipynb} --- the instructor's Homework 1 notebook (deep-learning-up). Today: Exercises 1--3.
+  \item \texttt{homework\_1\_theory.pdf} --- the theory problems; Problem 1 (manual backpropagation) is worked in class.
+  \item \texttt{data/synthetic\_2d.csv}, \texttt{data/diabetes.csv}.
+  \item Lecture 1 of ML II (perceptron, XOR, chain rule, backpropagation).
+\end{itemize}
+
+\section{Environment (15 min)}
+Colab: Runtime $\to$ Change runtime type $\to$ GPU (T4). Local: \texttt{pip install torch torchvision}.
+Verify:
+\begin{lstlisting}
+import torch; print(torch.__version__, torch.cuda.is_available())
+\end{lstlisting}
+Nothing today needs a GPU; the point is to know how to move a tensor to one (\texttt{.to(device)}) before Lab 2 does.
+
+\section{Tensors (30 min)}
+A tensor is a numpy array that (i) can live on a GPU and (ii) can record the operations applied to it.
+\begin{task}{Task 1 --- the same computation, twice}
+Redo Lab 1 of ML I in torch: the $5\times2$ design matrix, $\vX\T\vX$, and the normal-equation solution
+with \texttt{torch.linalg.solve}. Confirm $(1.49,\,0.75)$. Note the three things that differ from numpy:
+\texttt{dtype} defaults to \texttt{float32}, \texttt{@} works the same, and \texttt{.numpy()} converts back.
+\end{task}
+\begin{task}{Task 2 --- broadcasting and shapes}
+Build a batch of $B=64$ inputs $\vX\in\R^{64\times p}$, a weight matrix $\vW\in\R^{p\times h}$ and a bias
+$\vb\in\R^h$. Compute $\vX\vW+\vb$ and explain which axis the bias broadcasts along. Then transpose one
+operand deliberately and read the error message --- you will see it again.
+\end{task}
+
+\section{Autograd (45 min)}
+\begin{task}{Task 3 --- the derivative you know}
+Let $f(\vw)=\tfrac12\norm{\vy-\vX\vw}^2$. Create \texttt{w = torch.zeros(p, requires\_grad=True)},
+compute \texttt{f}, call \texttt{f.backward()}, and compare \texttt{w.grad} with $-\vX\T(\vy-\vX\vw)$ from
+ML I, Lecture 1. They must agree to \texttt{float32} precision.
+\end{task}
+\begin{task}{Task 4 --- a single neuron (Exercise 2)}
+Following Exercise 2 of the notebook: sigmoid neuron, BCE loss, gradient descent on
+\texttt{synthetic\_2d.csv}. Before running \texttt{.backward()}, write the gradient by hand using the
+identity from ML I, Lecture 2: $\partial\ell/\partial\vw=(\sigma(\vw\T\vx)-y)\,\vx$. Assert the two agree.
+\end{task}
+\begin{task}{Task 5 --- gradient descent, from ML I to torch (Exercise 1)}
+Exercise 1: OLS vs.\ gradient descent on \texttt{diabetes.csv}. Standardize, run GD with three learning
+rates, and reproduce the divergence above $2/\lambda_{\max}$ you saw in ML I --- now with
+\texttt{torch.optim.SGD} doing the update. Read the source of \texttt{SGD.step} once; it is twelve lines.
+\end{task}
+
+\section{Manual Backpropagation (50 min)}
+\begin{task}{Task 6 --- Exercise 3, and Problem 1 of the theory sheet}
+A two-layer network with sigmoid hidden units and a sigmoid output, BCE loss. Work Problem 1(a)--(c)
+on paper first (the ``beautiful cancellation'' $\partial\ell/\partial z=\hat y-y$ for sigmoid + BCE, then
+the two weight gradients by the chain rule). Then implement the forward and backward passes in numpy
+\emph{without} autograd, train, plot the decision boundary. Finally, rebuild the same network with
+\texttt{torch.nn.Module} and check that \texttt{autograd}'s gradients match yours at the initial weights
+to $10^{-6}$.
+\end{task}
+\begin{caution}
+The most common bug: forgetting \texttt{optimizer.zero\_grad()} before \texttt{.backward()}. Gradients
+\emph{accumulate} in PyTorch. Try it once deliberately and watch the loss curve.
+\end{caution}
+
+\section{Exercises (to submit before Lab 2)}
+\begin{exercise}
+Theory sheet, Problems 2 (activation derivatives, vanishing gradient) and 3 (OR with ReLU).
+\end{exercise}
+\begin{exercise}
+Notebook Exercise 4.A: an MLP with at most 100 hidden units on MNIST. Report test accuracy and the
+number of parameters. (The MNIST download is automatic through \texttt{torchvision}.)
+\end{exercise}
+
+\section*{Submission}
+Notebook \texttt{lab01\_lastname\_firstname.ipynb} and a PDF of the paper work, before Wednesday, October 14, 18:00.
+
+\end{document}

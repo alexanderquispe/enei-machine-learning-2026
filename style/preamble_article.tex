@@ -1,0 +1,65 @@
+% =============================================================================
+%  Shared article preamble — tutorials, homework, solutions.
+%  Same fonts, palette and notation as the Beamer decks (see preamble.tex).
+%      \documentclass[11pt]{article}
+%      \input{../../../style/preamble_article}
+% =============================================================================
+\usepackage[margin=1in]{geometry}
+\usepackage{helvet}
+\usepackage[default]{lato}
+\usepackage{mathpazo}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage{listings}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{hyperref}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{red}{RGB}{213,94,0}
+\definecolor{yellow}{RGB}{240,228,66}
+\definecolor{green}{RGB}{0,158,115}
+\hypersetup{colorlinks=true, linkcolor=blue, urlcolor=blue, citecolor=blue}
+
+\titleformat{\section}{\Large\bfseries\color{blue}}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{0.6em}{}
+\pagestyle{fancy}\fancyhf{}
+\rhead{\footnotesize ENEI -- INEI \,\textperiodcentered\, PEU-CD 2026}
+\lfoot{\footnotesize Machine Learning I \& II \,\textperiodcentered\, Alexander Quispe}
+\rfoot{\footnotesize\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+
+\newtcolorbox{derivation}[1]{enhanced, breakable, colback=blue!3, colframe=blue, fonttitle=\bfseries,
+  title={#1}, boxrule=0.6pt, left=6pt, right=6pt, top=4pt, bottom=4pt, arc=2pt}
+\newtcolorbox{claim}[1]{enhanced, breakable, colback=white, colframe=black, fonttitle=\bfseries,
+  title={#1}, boxrule=0.6pt, left=6pt, right=6pt, top=4pt, bottom=4pt, arc=2pt}
+\newtcolorbox{keypoint}{enhanced, breakable, colback=green!6, colframe=green, boxrule=0.6pt,
+  left=6pt, right=6pt, top=4pt, bottom=4pt, arc=2pt}
+\newtcolorbox{caution}{enhanced, breakable, colback=red!5, colframe=red, boxrule=0.6pt,
+  left=6pt, right=6pt, top=4pt, bottom=4pt, arc=2pt}
+\newtcolorbox{task}[1]{enhanced, breakable, colback=yellow!12, colframe=yellow!60!black, fonttitle=\bfseries,
+  title={#1}, boxrule=0.6pt, left=6pt, right=6pt, top=4pt, bottom=4pt, arc=2pt}
+
+\lstset{
+  basicstyle=\ttfamily\small, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green}, stringstyle=\color{red},
+  showstringspaces=false, breaklines=true, frame=single, rulecolor=\color{black!30},
+  numbers=none, xleftmargin=6pt, framexleftmargin=6pt, language=Python
+}
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{exercise}{Exercise}
+
+\input{../../../style/macros}

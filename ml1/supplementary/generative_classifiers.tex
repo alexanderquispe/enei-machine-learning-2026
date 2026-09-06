@@ -1,0 +1,37 @@
+% Supplementary reading for Machine Learning I: generative classifiers.
+% Assembled from lectures 4-6 of the instructor's ML_Foundations deck (reference/ml_foundations/source),
+% which do not fit in the six ML I sessions. Structure and text unchanged except for the two figure
+% frames in lecture 4, which carried the placeholder title "Frame Title" in the original.
+\documentclass[11pt,aspectratio=169]{beamer}
+\input{preamble}
+
+\title{\textcolor{blue}{Generative Classifiers}\\ \textcolor{black}{\normalsize Supplementary reading for Machine Learning I: multinomial logistic regression, LDA, GDA, Naive Bayes}}
+\author{Alexander Quispe}
+\institute{ENEI -- INEI \,\textperiodcentered\, PEU-CD 2026}
+\date{September 2026}
+
+\begin{document}
+
+\begin{frame}
+\maketitle
+\end{frame}
+
+\begin{frame}{How to Read This}
+\begin{itemize}
+  \item Machine Learning I stops at logistic regression, trees, ensembles and PCA. Everything here is \emph{discriminative $\to$ generative}: model $p(\mathbf{x}\mid y)$ and $p(y)$, then classify with Bayes' rule.
+  \item Part 1 extends logistic regression to $K$ classes (softmax) and introduces LDA from the Gaussian side.
+  \item Part 2 develops Gaussian discriminant analysis and the discriminative-vs-generative comparison.
+  \item Part 3 is Naive Bayes for text: bag of words, the conditional-independence assumption, and closed-form estimation.
+  \item Not examined in ML I. Assumed background for the text-as-data material in ML II, Lecture 5.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Outline}
+\tableofcontents
+\end{frame}
+
+\subfile{lectures/04_multinomial_lda/slides}
+\subfile{lectures/05_generative_gda/slides}
+\subfile{lectures/06_naive_bayes/slides}
+
+\end{document}

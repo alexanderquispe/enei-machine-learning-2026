@@ -1,5 +1,10 @@
 # Build Plan — ML I & ML II Course Repository
 
+> **Status (September 6, 2026):** executed in full. All 12 lecture decks, 8 lab tutorials, 8 ML I notebook
+> pairs, the supplementary deck and the three check scripts are built and pass `scripts/build.py`,
+> `scripts/check_slides.py` and `scripts/verify_math.py`. See the README for the map and the
+> "What to look at first" note in the commit that closed this plan.
+
 Execution plan for building the full course repository: slides, tutorials, labs and
 reference material for **Machine Learning I** and **Machine Learning II** (PEU-CD 2026,
 ENEI — INEI), to be shared with the teaching assistant.

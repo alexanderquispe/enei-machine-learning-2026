@@ -1,0 +1,336 @@
+\documentclass[../../main.tex]{subfiles}
+\begin{document}
+\graphicspath{{figures/}{lectures/03_logistic/figures/}}
+\section{Classification: Logistic Regression}
+\begin{frame}[plain]
+  \vfill\begin{center}{\Huge \textcolor{blue}{Classification: Logistic Regression}}\end{center}\vfill
+\end{frame}
+% Title Slide
+
+
+
+%--------------------------------------------------
+\begin{frame}{Classification: Introduction}
+\begin{itemize}
+    \item In regression, the response variable $Y$ is \textbf{quantitative}.  
+    \item In many applications, $Y$ is instead \textbf{qualitative} (categorical).  
+    \begin{itemize}
+        \item Examples: eye color, disease presence, fraud detection.  
+    \end{itemize}
+    \item Predicting a qualitative response is called \textbf{classification}.  
+    \item A classifier assigns each observation to a category (class).  
+    \item Often we estimate probabilities of class membership, and then classify.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Classification: Motivation}
+Real-world classification problems:
+\begin{enumerate}
+    \item \textbf{Medicine:} Predicting which disease a patient has from symptoms.  
+    \item \textbf{Finance:} Detecting fraudulent transactions from user behavior.  
+    \item \textbf{Biology:} Identifying whether DNA mutations are deleterious.  
+\end{enumerate}
+\begin{itemize}
+    \item Training data: $(x_1,y_1), \dots, (x_n,y_n)$ with $y_i \in \{1,\dots,K\}$.  
+    \item Goal: Build a classifier that predicts well on unseen test data.  
+    \item Methods include: \textbf{logistic regression, LDA, QDA, naive Bayes, KNN}.  
+\end{itemize}
+\end{frame}
+
+
+
+%--------------------------------------------------
+\begin{frame}{Why Not Linear Regression? (I)}
+\begin{itemize}
+    \item Linear regression assumes a \textbf{quantitative} response.  
+    \item For classification, $Y$ is \textbf{categorical} (e.g. stroke, drug overdose, epileptic seizure).  
+    \item One could encode categories as numbers:
+    \[
+    Y =
+    \begin{cases}
+    1 & \text{if stroke}, \\
+    2 & \text{if drug overdose}, \\
+    3 & \text{if epileptic seizure}.
+    \end{cases}
+    \]
+    \item Problem: This encoding imposes an \textbf{arbitrary ordering} of classes.  
+    \item Different codings lead to different regression models and predictions.  
+    \item There is generally no meaningful numeric ordering for qualitative outcomes.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Why Not Linear Regression? (II)}
+\begin{itemize}
+    \item For a binary outcome (e.g. $Y=0$ for stroke, $Y=1$ for drug overdose),  
+    linear regression can be fit, but issues remain:
+    \begin{itemize}
+        \item Predictions can fall outside the $[0,1]$ range.  
+        \item Estimates are not proper probabilities.  
+        \item Interpretation is problematic.  
+    \end{itemize}
+    \item Summary of issues:
+    \begin{enumerate}
+        \item Cannot accommodate more than two classes meaningfully.  
+        \item Even with two classes, does not yield valid probability estimates.  
+    \end{enumerate}
+    \item $\Rightarrow$ Need a proper classification model (e.g. logistic regression, LDA).  
+\end{itemize}
+\end{frame}
+
+
+%--------------------------------------------------
+\begin{frame}{Motivation for Logistic Regression}
+\begin{itemize}
+    \item Goal: Model $p(X) = \Pr(Y=1|X)$.  
+    \item Linear probability model: $p(X) = \beta_0 + \beta_1 X$.
+    \begin{itemize}
+        \item Issues: predictions $<0$ or $>1$, nonsensical as probabilities.  
+    \end{itemize}
+    \item We require a function $p(X)$ that:
+    \begin{enumerate}
+        \item Maps $\mathbb{R} \to (0,1)$.  
+        \item Is flexible, but allows interpretable parameters.  
+    \end{enumerate}
+    \item Solution: the \textbf{logistic function}.
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{The Logistic Function}
+We want to model the probability $p(x) = \Pr(Y=1 \mid X=x)$.  
+\[
+p(x) = \frac{1}{1 + e^{-(x-\mu)/s}},
+\]
+where:
+\begin{itemize}
+    \item $\mu$ = location parameter (midpoint, where $p(\mu)=1/2$).  
+    \item $s$ = scale parameter (controls slope at midpoint).  
+\end{itemize}
+\[
+\lim_{x\to -\infty} p(x) = 0, \qquad \lim_{x\to +\infty} p(x) = 1.
+\]
+\begin{itemize}
+    \item This function maps $\mathbb{R} \to (0,1)$, suitable for probabilities.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Reparameterization}
+Rewrite logistic function in regression form:
+\[
+p(x) = \frac{1}{1 + e^{-(\beta_0 + \beta_1 x)}}.
+\]
+where:
+\[
+\beta_0 = -\mu/s \quad \text{(intercept)}, \qquad \beta_1 = 1/s \quad \text{(slope)}.
+\]
+Interpretation:
+\begin{itemize}
+    \item $\beta_0$ = log-odds when $x=0$.  
+    \item $\beta_1$ = change in log-odds per unit increase in $x$.  
+\end{itemize}
+Thus:
+\[
+\text{logit}(p(x)) = \log \frac{p(x)}{1-p(x)} = \beta_0 + \beta_1 x.
+\]
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{The Logistic Regression Model}
+Generalize to multiple predictors $X \in \mathbb{R}^p$:
+\[
+p(x) = \Pr(Y=1 \mid X=x) = \frac{1}{1 + e^{-(\beta_0 + \beta^T x)}}.
+\]
+Key properties:
+\begin{itemize}
+    \item $p(x)$ is always between 0 and 1.  
+    \item $\log \dfrac{p(x)}{1-p(x)} = \beta_0 + \beta^T x$ (linear in predictors).  
+    \item Parameters $(\beta_0, \beta)$ estimated by maximum likelihood.  
+\end{itemize}
+This is the foundation of \textbf{classification via logistic regression}.
+\end{frame}
+
+
+
+%--------------------------------------------------
+\begin{frame}{The Logistic Function}
+\[
+p(X) = \frac{e^{\beta_0 + \beta^T X}}{1 + e^{\beta_0 + \beta^T X}}.
+\]
+\begin{itemize}
+    \item Always $\in (0,1)$.  
+    \item Symmetric S-shaped curve.  
+    \item $\lim_{z\to -\infty} p(z)=0$, $\lim_{z\to +\infty} p(z)=1$.  
+\end{itemize}
+\[
+\text{Logistic regression model: } \quad Y_i \sim \text{Bernoulli}(p_i), \quad 
+p_i = \frac{e^{\beta_0 + \beta^T x_i}}{1 + e^{\beta_0 + \beta^T x_i}}.
+\]
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Odds and Log-Odds}
+Define odds of success:
+\[
+\text{odds}(X) = \frac{p(X)}{1 - p(X)}.
+\]
+From logistic model:
+\[
+\frac{p(X)}{1 - p(X)} = e^{\beta_0 + \beta^T X}.
+\]
+Taking logarithm:
+\[
+\log\left(\frac{p(X)}{1 - p(X)}\right) = \beta_0 + \beta^T X.
+\]
+\begin{itemize}
+    \item The \textbf{log-odds (logit)} is linear in $X$.  
+    \item Interpretation: coefficients act multiplicatively on the odds.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Interpretation of Coefficients}
+\begin{itemize}
+    \item For predictor $X_j$, coefficient $\beta_j$ means:
+    \[
+    \log\left(\frac{p(X)}{1 - p(X)}\right) \;\; \text{increases by } \beta_j \;\; \text{for a one-unit increase in } X_j.
+    \]
+    \item Equivalently, odds are multiplied by $e^{\beta_j}$.  
+    \item Example: $\beta_j = 0.7 \Rightarrow e^{0.7} \approx 2.01$, doubling the odds per unit increase in $X_j$.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Likelihood for Logistic Regression}
+Data: $\{(x_i,y_i)\}_{i=1}^N$, with $y_i \in \{0,1\}$.
+\[
+p_i = \Pr(Y_i=1|x_i) = \frac{e^{\beta_0 + \beta^T x_i}}{1+e^{\beta_0 + \beta^T x_i}}.
+\]
+Likelihood:
+\[
+L(\beta) = \prod_{i=1}^N p_i^{y_i} (1-p_i)^{1-y_i}.
+\]
+Log-likelihood:
+\[
+\ell(\beta) = \sum_{i=1}^N \Big[ y_i(\beta_0 + \beta^T x_i) - \log(1 + e^{\beta_0 + \beta^T x_i}) \Big].
+\]
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{MLE: First-Order Conditions}
+Gradient (score equations):
+\[
+\frac{\partial \ell(\beta)}{\partial \beta} 
+= \sum_{i=1}^N (y_i - p_i)x_i.
+\]
+Setting gradient $=0$:
+\[
+\sum_{i=1}^N (y_i - p_i)x_i = 0.
+\]
+\begin{itemize}
+    \item No closed form solution.  
+    \item Must use iterative methods: Newton–Raphson or IRLS (iteratively reweighted least squares).  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Newton--Raphson for Maximum Likelihood}
+Goal: maximize the log-likelihood $\ell(\beta)$.  
+\begin{itemize}
+    \item General iterative scheme:
+    \[
+    \beta^{(t+1)} = \beta^{(t)} - \Big[ H(\beta^{(t)}) \Big]^{-1} \nabla \ell(\beta^{(t)}),
+    \]
+    where:
+    \begin{itemize}
+        \item $\nabla \ell(\beta)$ = gradient (score vector).  
+        \item $H(\beta)$ = Hessian matrix (second derivatives).  
+    \end{itemize}
+    \item Intuition:
+    \begin{itemize}
+        \item Uses a quadratic approximation of $\ell(\beta)$.  
+        \item Updates parameters by moving towards stationary point.  
+        \item Converges quickly near the optimum.  
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Newton--Raphson for Logistic Regression}
+For logistic regression:
+\[
+\nabla \ell(\beta) = \sum_{i=1}^N (y_i - p_i) x_i, 
+\quad
+H(\beta) = -\sum_{i=1}^N p_i(1-p_i) x_i x_i^T.
+\]
+Newton--Raphson update:
+\[
+\beta^{(t+1)} = \beta^{(t)} + \Big[ \sum_{i=1}^N p_i(1-p_i) x_i x_i^T \Big]^{-1} 
+\sum_{i=1}^N (y_i - p_i)x_i.
+\]
+\begin{itemize}
+    \item This can be written as a \textbf{weighted least squares problem}:  
+    \[
+    \beta^{(t+1)} = (X^T W X)^{-1} X^T W z,
+    \]
+    where:
+    \[
+    W = \mathrm{diag}(p_i(1-p_i)), \quad 
+    z = X\beta^{(t)} + W^{-1}(y - p).
+    \]
+    \item Known as \textbf{Iteratively Reweighted Least Squares (IRLS)}.  
+\end{itemize}
+\end{frame}
+
+
+%--------------------------------------------------
+\begin{frame}{MLE: Second-Order Conditions}
+Hessian (matrix of second derivatives):
+\[
+H(\beta) = \frac{\partial^2 \ell}{\partial \beta \partial \beta^T} 
+= -\sum_{i=1}^N p_i(1-p_i) x_i x_i^T.
+\]
+\begin{itemize}
+    \item Negative definite $\Rightarrow$ log-likelihood is concave.  
+    \item Ensures unique global maximum.  
+    \item Newton–Raphson update:
+    \[
+    \beta^{(t+1)} = \beta^{(t)} - H(\beta^{(t)})^{-1} \nabla \ell(\beta^{(t)}).
+    \]
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Asymptotic Properties of MLE}
+Under standard regularity conditions:
+\[
+\hat{\beta} \xrightarrow{p} \beta_0 \quad \text{(consistency)}.
+\]
+\[
+\sqrt{N}(\hat{\beta} - \beta_0) \xrightarrow{d} \mathcal{N}(0, I(\beta_0)^{-1}),
+\]
+where
+\[
+I(\beta_0) = \mathbb{E}\!\left[ p(X)(1-p(X))XX^T \right]
+\]
+is the Fisher information matrix.
+\begin{itemize}
+    \item Provides standard errors for inference.  
+    \item Enables Wald tests, score tests, likelihood ratio tests.  
+\end{itemize}
+\end{frame}
+
+%--------------------------------------------------
+\begin{frame}{Summary of Logistic Regression}
+\begin{itemize}
+    \item Models $p(X) = \Pr(Y=1|X)$ using the logistic function.  
+    \item Log-odds are linear in predictors.  
+    \item Parameters estimated via maximum likelihood.  
+    \item Gradient and Hessian yield efficient algorithms (Newton–Raphson, IRLS).  
+    \item MLE has desirable large-sample properties (consistency, asymptotic normality).  
+    \item Foundation for extensions: multinomial logit, generalized linear models.  
+\end{itemize}
+\end{frame}
+\end{document}

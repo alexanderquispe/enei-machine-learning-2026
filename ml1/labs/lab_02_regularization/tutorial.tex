@@ -1,0 +1,162 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 2 --- Ridge, Lasso and Cross-Validation}\\[4pt]
+\large Machine Learning I \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, September 16, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Implement ridge and lasso from the formulas in Lecture 3 --- closed form,
+SVD shrinkage, soft thresholding, coordinate descent --- check each against scikit-learn, then choose
+$\lambda$ properly and see what regularization does to a logistic regression that has no MLE.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{lab\_02\_student.ipynb} / \texttt{lab\_02\_solution.ipynb}.
+  \item Sources: CS 155 Set 2 (loss functions, effects of regularization, lasso vs.\ ridge).
+  \item Data: \texttt{load\_diabetes} (regression) and \texttt{load\_breast\_cancer} (classification), both bundled with scikit-learn.
+\end{itemize}
+
+\section*{A note on conventions}
+Every library defines the penalty slightly differently. Keep this table next to you.
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+ & Objective & Relation to Lecture 3 \\
+\midrule
+Lecture 3, ridge & $\norm{\vy-\vX\vbeta}^2+\lambda\norm\vbeta^2$ & --- \\
+\texttt{sklearn.linear\_model.Ridge(alpha)} & $\norm{\vy-\vX\vw}^2+\alpha\norm\vw^2$ & $\alpha=\lambda$ \\
+Lecture 3, lasso & $\frac12\norm{\vy-\vX\vbeta}^2+\lambda\norm\vbeta_1$ & --- \\
+\texttt{sklearn.linear\_model.Lasso(alpha)} & $\frac{1}{2N}\norm{\vy-\vX\vw}^2+\alpha\norm\vw_1$ & $\alpha=\lambda/N$ \\
+\texttt{LogisticRegression(C)} & $\frac12\norm\vw^2+C\sum_i\log\bigl(1+e^{-\tilde y_i\vx_i\T\vw}\bigr)$ & $C=1/\lambda$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Both scikit-learn regressors fit the intercept separately and unpenalized, as Lecture 3 prescribes.
+
+\section{Ridge from the Formula (35 min)}
+
+\begin{task}{Task 1 --- closed form}
+Standardize the diabetes features and centre $\vy$. Implement
+$\hat\vbeta_\lambda=(\vX\T\vX+\lambda\vI)\inv\vX\T\vy$ with \texttt{np.linalg.solve}. For $\lambda\in\{0.1,1,10,100\}$,
+compare with \texttt{Ridge(alpha=$\lambda$, fit\_intercept=False)} on the same standardized data. Agreement to $10^{-8}$.
+\end{task}
+
+\begin{task}{Task 2 --- the SVD picture}
+Compute the thin SVD $\vX=\vU\vD\vV\T$ (\texttt{np.linalg.svd(X, full\_matrices=False)}). Verify numerically
+that for $\lambda=10$
+\[
+\hat\vy_\lambda=\sum_{j=1}^p\vu_j\,\frac{d_j^2}{d_j^2+\lambda}\,\vu_j\T\vy
+\]
+matches $\vX\hat\vbeta_\lambda$ from Task 1. Print the ten shrinkage factors $d_j^2/(d_j^2+\lambda)$. Which
+direction is shrunk most, and what is its $d_j$? Then plot $\mathrm{df}(\lambda)=\sum_jd_j^2/(d_j^2+\lambda)$
+for $\lambda\in[10^{-2},10^4]$ on a log axis. Confirm $\mathrm{df}(0)=10$.
+\end{task}
+
+\begin{task}{Task 3 --- the ridge path}
+Plot all ten $\hat\beta_j(\lambda)$ against $\lambda$ on a log axis, $\lambda\in[10^{-2},10^4]$. Every curve
+must go to zero and none may cross zero exactly (ridge never produces an exact zero from a nonzero OLS
+coefficient --- explain why with the SVD formula).
+\end{task}
+
+\section{Lasso from the Formula (50 min)}
+
+\begin{task}{Task 4 --- soft thresholding}
+Write \texttt{soft(b, lam)} $=\sign(b)\,(\abs b-\lambda)_+$, vectorized. Check the Lecture 3 example:
+\texttt{soft([3, 0.5, -2], 1)} must return \texttt{[2, 0, -1]}, and the ridge shrinkage $b/(1+\lambda)$
+must return \texttt{[1.5, 0.25, -1]}.
+\end{task}
+
+\begin{task}{Task 5 --- coordinate descent}
+Implement the lasso by coordinate descent for the Lecture 3 objective $\frac12\norm{\vy-\vX\vbeta}^2+\lambda\norm\vbeta_1$:
+\begin{lstlisting}
+def lasso_cd(X, y, lam, iters=20000, tol=1e-10):
+    n, p = X.shape
+    beta = np.zeros(p)
+    r = y.copy()                          # full residual y - X beta
+    for _ in range(iters):
+        for j in range(p):
+            r_j = r + X[:, j] * beta[j]   # partial residual, coordinate j removed
+            b_new = soft(X[:, j] @ r_j, lam) / (X[:, j] @ X[:, j])
+            r = r_j - X[:, j] * b_new     # update the residual incrementally
+            beta[j] = b_new
+    return beta
+\end{lstlisting}
+Add a stopping rule (sweep until no coordinate moves more than \texttt{tol}; correlated columns make plain coordinate descent slow), then compare with \texttt{Lasso(alpha=lam/N, fit\_intercept=False)} for
+$\lambda\in\{50,200,800\}$ on standardized, centred data. Which coefficients are exactly zero? Verify the KKT
+condition on the solution: $\abs{\vx^{(j)\top}\vr}=\lambda$ for every active $j$ and $\le\lambda$ for every inactive $j$.
+\end{task}
+
+\begin{task}{Task 6 --- the lasso path and $\lambda_{\max}$}
+Compute $\lambda_{\max}=\norm{\vX\T\vy}_\infty$. Show that \texttt{lasso\_cd(X, y, 1.01 * lam\_max)} returns all
+zeros and \texttt{lasso\_cd(X, y, 0.99 * lam\_max)} does not. Then plot the full path with
+\texttt{sklearn.linear\_model.lasso\_path}. In what order do features enter? Compare with the ridge path of
+Task 3 on the same axes.
+\end{task}
+
+\section{Choosing $\lambda$ (35 min)}
+
+\begin{task}{Task 7 --- cross-validation with error bars}
+For 40 values of $\lambda$ on a log grid, compute the 10-fold CV MSE of the lasso and its standard error
+across folds (use \texttt{KFold(10, shuffle=True, random\_state=155)}; standardize \emph{inside} each fold
+with a \texttt{Pipeline}). Plot the curve with error bars. Mark $\hat\lambda_{\min}$ and the one-standard-error
+choice $\hat\lambda_{1\text{se}}$. How many nonzero coefficients does each have?
+\end{task}
+
+\begin{task}{Task 8 --- optimism, measured}
+Lecture 3 proves $\E[\text{test}]-\E[\text{train}]=2\sigma^2\,\mathrm{df}/N$ for a linear smoother. Test it on ridge:
+for $\lambda\in\{0.1,1,10,100,1000\}$, compute (i) training MSE, (ii) 10-fold CV MSE, (iii)
+$2\hat\sigma^2\,\mathrm{df}(\lambda)/N$ with $\hat\sigma^2$ from the OLS residuals. Tabulate
+(ii)$-$(i) against (iii). They should track each other in size and in trend.
+\end{task}
+
+\section{Regularized Logistic Regression (40 min)}
+
+\begin{task}{Task 9 --- separable data has no MLE}
+Generate two well-separated Gaussian clouds in $\R^2$ (30 points each, means $(-2,0)$ and $(2,0)$, unit
+variance). Fit \texttt{LogisticRegression(penalty=None, max\_iter=10000)} and print $\norm{\hat\vw}$ and the
+fitted probabilities. Then fit with \texttt{C} $\in\{10^3,10^2,10,1,0.1\}$ and plot $\norm{\hat\vw}$ against $C$
+on a log axis. Explain the shape using Lecture 2, slide ``When the MLE Does Not Exist''.
+\end{task}
+
+\begin{task}{Task 10 --- a real classifier, evaluated properly}
+On \texttt{load\_breast\_cancer} ($N=569$, $p=30$), with an 80/20 split:
+\begin{enumerate}[nosep]
+  \item Fit $\ell_2$-regularized logistic regression with $C$ chosen by 5-fold CV on the training set.
+  \item Report accuracy, precision, recall, $F_1$ and the confusion matrix on the test set at threshold $0.5$.
+  \item Plot the ROC curve and compute the AUC two ways: with \texttt{roc\_auc\_score}, and directly as the
+        fraction of (positive, negative) test pairs with the positive scored higher. They must agree.
+  \item Suppose a false negative (missed malignancy) costs 10 times a false positive. Compute
+        $\tau^\star=c_{\text{FP}}/(c_{\text{FP}}+c_{\text{FN}})$, re-threshold, and report the new confusion matrix and expected cost.
+        Compare with the cost at $\tau=0.5$.
+\end{enumerate}
+\end{task}
+
+\section{Exercises (to submit before Lab 3)}
+\begin{exercise}
+Hoerl--Kennard. With $\vX\T\vX=\vV\vD^2\vV\T$ and $\vgamma=\vV\T\vbeta$, show that the total mean squared error
+$\E\norm{\hat\vbeta_\lambda-\vbeta}^2$ of ridge equals
+$\sum_j\bigl[\sigma^2d_j^2+\lambda^2\gamma_j^2\bigr]/(d_j^2+\lambda)^2$, differentiate at $\lambda=0$, and
+conclude that its derivative is negative --- so some $\lambda>0$ beats OLS.
+\end{exercise}
+\begin{exercise}
+Extend \texttt{lasso\_cd} to the elastic net $\frac12\norm{\vy-\vX\vbeta}^2+\lambda_1\norm\vbeta_1+\frac{\lambda_2}{2}\norm\vbeta^2$
+by deriving the coordinate update (it is soft thresholding divided by $\norm{\vx^{(j)}}^2+\lambda_2$).
+Check against \texttt{ElasticNet}.
+\end{exercise}
+\begin{exercise}
+Repeat Task 7 with 20 different random fold assignments. Report the mean and standard deviation of
+$\hat\lambda_{\min}$ and of $\hat\lambda_{1\text{se}}$ (on the log scale). Which choice is more stable, and why
+would you expect that from the shape of the CV curve?
+\end{exercise}
+
+\section*{Submission}
+One executed notebook, \texttt{lab02\_lastname\_firstname.ipynb}, to the course drive before
+Wednesday, September 23, 18:00.
+
+\end{document}

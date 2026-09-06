@@ -1,0 +1,3 @@
+[submodule "reference/deep_learning_up"]
+	path = reference/deep_learning_up
+	url = https://github.com/alexanderquispe/deep-learning-up.git

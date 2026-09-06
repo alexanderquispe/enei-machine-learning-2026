@@ -1,0 +1,145 @@
+\documentclass{article}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{amsmath}
+
+% Python syntax highlighting colors
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{codeblue}{rgb}{0.0,0.0,0.8}
+\definecolor{codeorange}{rgb}{0.8,0.4,0.0}
+\definecolor{backcolour}{rgb}{0.97,0.97,0.97}
+
+% Python listings style
+\lstdefinestyle{pythonstyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codeblue}\bfseries,
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codeorange},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=4,
+    frame=single,
+    framerule=0.5pt,
+    rulecolor=\color{codegray},
+}
+
+\lstset{style=pythonstyle}
+\usepackage{subfig}
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{mdwlist}
+\usepackage{geometry}
+\usepackage{titlesec}
+\usepackage{palatino}
+\usepackage{mathrsfs}
+\usepackage{fancyhdr}
+\usepackage{paralist}
+\usepackage{todonotes}
+\usepackage{tikz}
+\usepackage{float} % Place figures where you ACTUALLY want it
+\usepackage{comment} % A hack to toggle sections
+\usepackage{ifthen}
+\usepackage{mdframed}
+\usepackage{verbatim}
+\usepackage{listings}
+\usepackage{bbm}
+\usepackage{upquote} % Prevents backticks replacing single-quotes in verbatim
+\usepackage[strings]{underscore}
+\usepackage[colorlinks=true]{hyperref}
+\usetikzlibrary{positioning,shapes,backgrounds}
+
+\geometry{margin=1in}
+\geometry{headheight=2in}
+\geometry{top=2in}
+
+\setlength{\marginparwidth}{2.15cm}
+\setlength{\parindent}{0em}
+\setlength{\parskip}{0.6\baselineskip}
+
+\rhead{}
+\lhead{}
+
+% Spacing settings.
+\titlespacing\section{0pt}{12pt plus 2pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing\subsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\titlespacing\subsubsection{0pt}{12pt plus 4pt minus 2pt}{0pt plus 2pt minus 2pt}
+\renewcommand{\baselinestretch}{1.15}
+
+% Shortcuts for commonly used operators.
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\operatorname{Var}}
+\newcommand{\Cov}{\operatorname{Cov}}
+\newcommand{\Bias}{\operatorname{Bias}}
+\DeclareMathOperator{\argmin}{arg\,min}
+\DeclareMathOperator{\argmax}{arg\,max}
+
+% Do not number subsections and below.
+\setcounter{secnumdepth}{1}
+
+% Custom format subsection.
+\titleformat*{\subsection}{\large\bfseries}
+
+% Set up the problem environment.
+\newcounter{problem}[section]
+\newenvironment{problem}[1][]
+  {\begingroup
+    \setlength{\parskip}{0em}
+    \refstepcounter{problem}\par\addvspace{1em}\textbf{Problem~\Alph{problem}\!
+    \ifthenelse{\equal{#1}{}}{}{ [#1 points]}:}
+  \endgroup}
+
+% Set up the subproblem environment.
+\newcounter{subproblem}[problem]
+\newenvironment{subproblem}[1][]
+  {\begingroup
+    \setlength{\parskip}{0em}
+    \refstepcounter{subproblem}\par\medskip\textbf{\roman{subproblem}.\!
+    \ifthenelse{\equal{#1}{}}{}{ [#1 points]:}}
+  \endgroup}
+
+% Set up the problem command (standalone version).
+\providecommand{\problem}[1][]{\refstepcounter{problem}\par\addvspace{1em}\textbf{Problem~\Alph{problem}\ifthenelse{\equal{#1}{}}{}{ [#1 points]}:}}
+
+% Set up the teachers and materials commands.
+\newcommand\teachers[1]
+  {\begingroup
+    \setlength{\parskip}{0em}
+    \vspace{0.3em} \textit{\hspace*{2em} TAs responsible: #1} \par
+  \endgroup}
+\newcommand\materials[1]
+  {\begingroup
+    \setlength{\parskip}{0em}
+    \textit{\hspace*{2em} Relevant materials: #1} \par \vspace{1em}
+  \endgroup}
+
+% Set up the hint environment.
+\newenvironment{hint}[1][]
+  {\begin{em}\textbf{Hint: }}
+  {\end{em}}
+
+
+% Set up the solution environment.
+\ifshowsolutions
+  \newenvironment{solution}[1][]
+    {\par\medskip \begin{mdframed}\textbf{Solution~\Alph{problem}#1:} \begin{em}}
+    {\end{em}\medskip\end{mdframed}\medskip}
+  \newenvironment{subsolution}[1][]
+    {\par\medskip \begin{mdframed}\textbf{Solution~\Alph{problem}#1.\roman{subproblem}:} \begin{em}}
+    {\end{em}\medskip\end{mdframed}\medskip}
+\else
+  \excludecomment{solution}
+  \excludecomment{subsolution}
+\fi

@@ -1,0 +1,94 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 4 --- Project: Matrix Completion on a Panel}\\[4pt]
+\large Machine Learning II \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Monday, October 26, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} The coding project of Homework 3, carried to the end: complete a panel
+with a staggered treatment by low-rank factorization, read the completed entries as counterfactuals,
+quantify the uncertainty, and write it up. Self-attention (Problem 18) is the extension for those who
+finish early. This is the last session of ML II.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{homework\_3\_student.pdf} --- Problem 17 (the project) and Problem 18 (self-attention).
+  \item \texttt{homework\_3\_student.ipynb} / \texttt{homework\_3\_solution.ipynb} --- Parts 1, 2.
+  \item Lectures 4 and 6 of ML II; ML I, Lecture 6 (Eckart--Young) and Lecture 3 (ridge).
+\end{itemize}
+
+\section{The Problem (20 min)}
+A panel $\vY\in\R^{M\times T}$, $M=20$ units, $T=12$ periods. Units adopt a treatment at staggered dates;
+after adoption, the untreated outcome $Y_{it}(0)$ is \textbf{missing}. The entries we see are the
+untreated ones, $\Omega=\{(i,t):\text{not yet treated}\}$. If $\vY(0)$ has low rank --- a few common
+factors drive every unit --- then the missing block can be recovered:
+\[
+\min_{\vU\in\R^{M\times K},\ \vV\in\R^{T\times K}}\ \frac12\sum_{(i,t)\in\Omega}\bigl(Y_{it}-\vu_i\T\vv_t\bigr)^2
++\frac\lambda2\bigl(\norm\vU_F^2+\norm\vV_F^2\bigr),
+\qquad
+\hat Y_{it}(0)=\hat\vu_i\T\hat\vv_t\ \text{ for }(i,t)\notin\Omega .
+\]
+The treatment effect estimate is $\hat\tau_{it}=Y_{it}-\hat Y_{it}(0)$ on the treated cells. Synthetic
+control is the special case where $\hat\vu_i$ is constrained to be a convex combination of control units'
+rows (Problem 6(d) of the homework).
+
+\section{Build It (60 min)}
+\begin{task}{Task 1 --- the pipeline}
+Starting from your Lab 3 code:
+\begin{enumerate}[nosep]
+  \item Generate the panel (notebook Part 1). Record the true $\vY(0)$, the true rank, the treatment dates and the true effects --- you will grade yourself against them at the end, and \emph{only} at the end.
+  \item Fit by SGD for $K\in\{1,\dots,6\}$, $\lambda\in\{0,0.01,0.1,1\}$. Select $(K,\lambda)$ by \textbf{cross-validation on observed entries}: hold out 10\% of $\Omega$ at random, five times.
+  \item Refit on all of $\Omega$ at the chosen $(K,\lambda)$; complete the matrix; compute $\hat\tau_{it}$ on the treated cells.
+\end{enumerate}
+\end{task}
+\begin{task}{Task 2 --- uncertainty}
+Two ways, both required:
+\begin{enumerate}[nosep]
+  \item \textbf{Placebo.} Pretend a never-treated unit was treated at a random date; complete; the ``effect'' you
+        recover is pure noise. Repeat 50 times for the null distribution of $\hat\tau$.
+  \item \textbf{Bootstrap.} Resample units with replacement (ML I, Lecture 4), refit, recompute the average
+        treatment effect on the treated. Report the standard deviation over 100 resamples.
+\end{enumerate}
+\end{task}
+\begin{task}{Task 3 --- what CV cannot see}
+Cross-validation on $\Omega$ holds out random untreated cells; the cells you actually need are a
+\emph{block} in the lower-right corner. Compare the CV error with the true error on the treated block
+(now you may look). Explain the gap with the sampling argument of ML I, Lecture 1: the held-out cells are
+not drawn from the distribution of the cells you predict.
+\end{task}
+
+\section{Write It Up (40 min)}
+\begin{task}{Deliverable}
+A notebook and a report of at most 4 pages:
+\begin{enumerate}[nosep]
+  \item The model, the objective, and the assumption that makes completion possible (low rank), stated precisely.
+  \item The selection procedure and the chosen $(K,\lambda)$; the CV curve.
+  \item The estimated effects with placebo and bootstrap uncertainty; one figure.
+  \item The CV-vs-truth gap and what it implies for a real panel where the truth is unavailable.
+  \item One derivation from ML II, reproduced in your own words: the SGD gradient for the factorization, the
+        ALS closed form, or the trace-norm connection of Lecture 4.
+\end{enumerate}
+\end{task}
+\textbf{Rubric} (out of 20): model and assumptions 4, selection 4, uncertainty 5, the gap 3, derivation 4.
+
+\section{Extension: Self-Attention From Scratch (if time allows)}
+\begin{task}{Problem 18}
+Implement single-head scaled dot-product self-attention in numpy for a $T\times D$ input: $\vQ,\vK,\vV$
+projections, scores $\vQ\vK\T/\sqrt{d_k}$, row-softmax, output. Match \texttt{torch.nn.MultiheadAttention}
+with one head to $10^{-6}$. Then multi-head with the output projection $\vW_O$. Before coding, reproduce
+Lecture 6's derivation of why the scores are divided by $\sqrt{d_k}$: with i.i.d.\ unit-variance entries,
+$\Var(\vq\T\vk)=d_k$, and an unscaled softmax over scores of that size saturates.
+\end{task}
+
+\section*{Submission}
+Project notebook and PDF, \texttt{project\_lastname\_firstname.*}, before Friday, October 30, 23:59.
+The oral exam study guide (\texttt{reference/deep\_learning\_up/final\_exam/}) covers Lectures 1--6 of ML II;
+its ``Latent Factor Models'' and ``Attention'' sections are the ones this lab prepares you for.
+
+\end{document}

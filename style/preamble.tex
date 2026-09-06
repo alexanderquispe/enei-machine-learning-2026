@@ -1,0 +1,122 @@
+% =============================================================================
+%  Shared Beamer preamble — Machine Learning I & II, PEU-CD 2026 (ENEI / INEI)
+%
+%  Inherited from the ML_Foundations deck (Alexander Quispe), with three changes:
+%    * `minted` removed — it shells out to Pygments and does not build under
+%      tectonic; every code block in the course uses `listings`.
+%    * unused packages (lipsum, blindtext, multimedia, videoframe) dropped.
+%    * `bbm` dropped — its fonts are PK-only and tectonic cannot render them;
+%      the indicator uses \mathbf{1} instead.
+%    * a math-macro block added so all twelve lectures share one notation.
+%
+%  Each lecture is a standalone document:
+%      \documentclass[11pt,aspectratio=169]{beamer}
+%      \input{../../../style/preamble}
+% =============================================================================
+
+% ---------- fonts ----------
+\usepackage{helvet}
+\usepackage[default]{lato}
+\usepackage{tgbonum}
+\usepackage{mathpazo}
+\usepackage[utf8]{inputenc}
+
+% ---------- math ----------
+\usepackage{amsmath,amssymb}
+\usepackage{mathtools}
+
+% ---------- graphics, tables, layout ----------
+\usepackage{graphicx}
+\usepackage{tikz}
+\usetikzlibrary{positioning,calc,arrows,arrows.meta,decorations.markings,shapes.misc,matrix,shapes,fit}
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{dcolumn}
+\usepackage{subcaption}
+\usepackage{caption}
+\usepackage{changepage}
+\usepackage{xspace}
+\usepackage{tcolorbox}
+\tcbuselibrary{skins,breakable}
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{listings}
+\usepackage{appendixnumberbeamer}
+\usepackage{hyperref}
+
+\newcolumntype{d}[0]{D{.}{.}{5}}
+\setbeamertemplate{caption}[numbered]
+
+% ---------- palette (Okabe–Ito, colour-blind safe) ----------
+\definecolor{blue}{RGB}{0,114,178}
+\definecolor{red}{RGB}{213,94,0}
+\definecolor{yellow}{RGB}{240,228,66}
+\definecolor{green}{RGB}{0,158,115}
+\definecolor{MyBackground}{RGB}{255,253,218}
+
+\hypersetup{colorlinks=true, linkbordercolor={white}, linkcolor={blue}, urlcolor={blue}}
+
+% ---------- beamer look ----------
+\setbeamercolor{frametitle}{fg=blue}
+\setbeamercolor{title}{fg=black}
+\setbeamertemplate{footline}[frame number]
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}{-}
+\setbeamercolor{itemize item}{fg=blue}
+\setbeamercolor{itemize subitem}{fg=blue}
+\setbeamercolor{enumerate item}{fg=blue}
+\setbeamercolor{enumerate subitem}{fg=blue}
+\setbeamercolor{button}{bg=MyBackground,fg=blue}
+\setbeamercolor{section in toc}{fg=blue}
+\setbeamercolor{subsection in toc}{fg=red}
+\setbeamersize{text margin left=1em,text margin right=1em}
+\setbeamercolor{block title}{fg=white,bg=blue}
+\setbeamercolor{block body}{bg=blue!5}
+\setbeamercolor{block title alerted}{fg=white,bg=red}
+\setbeamercolor{block body alerted}{bg=red!5}
+\setbeamercolor{block title example}{fg=white,bg=green}
+\setbeamercolor{block body example}{bg=green!5}
+\setbeamertemplate{blocks}[rounded][shadow=false]
+
+\newenvironment{wideitemize}{\itemize\addtolength{\itemsep}{10pt}}{\enditemize}
+
+\newenvironment{transitionframe}{
+  \setbeamercolor{background canvas}{bg=yellow}
+  \begin{frame}}{
+  \end{frame}
+}
+
+% Section divider: a plain frame with a large blue title.
+\newcommand{\sectionframe}[1]{%
+  \section{#1}%
+  \begin{frame}[plain]\vfill\begin{center}{\Huge\textcolor{blue}{#1}}\end{center}\vfill\end{frame}}
+
+% ---------- proof / derivation environments ----------
+% derivation: a boxed, step-by-step algebraic argument. Title is the claim.
+\newtcolorbox{derivation}[1]{enhanced, colback=blue!3, colframe=blue, fonttitle=\bfseries,
+  title={#1}, boxrule=0.6pt, left=4pt, right=4pt, top=3pt, bottom=3pt, arc=2pt}
+% claim: a result to be proved (theorem / lemma / proposition).
+\newtcolorbox{claim}[1]{enhanced, colback=white, colframe=black, fonttitle=\bfseries,
+  title={#1}, boxrule=0.6pt, left=4pt, right=4pt, top=3pt, bottom=3pt, arc=2pt}
+% keypoint: the one line to remember from a slide.
+\newtcolorbox{keypoint}{enhanced, colback=green!6, colframe=green, boxrule=0.6pt,
+  left=4pt, right=4pt, top=3pt, bottom=3pt, arc=2pt}
+% caution: a common mistake or a subtlety.
+\newtcolorbox{caution}{enhanced, colback=red!5, colframe=red, boxrule=0.6pt,
+  left=4pt, right=4pt, top=3pt, bottom=3pt, arc=2pt}
+
+% ---------- code ----------
+\lstset{
+  basicstyle=\ttfamily\scriptsize, keywordstyle=\color{blue}\bfseries,
+  commentstyle=\color{green}, stringstyle=\color{red},
+  showstringspaces=false, breaklines=true, frame=single, rulecolor=\color{black!30},
+  numbers=none, xleftmargin=4pt, framexleftmargin=4pt, language=Python
+}
+
+\input{../../../style/macros}
+
+% ---------- course-wide title metadata ----------
+\newcommand{\courseinstitution}{ENEI -- INEI \,\textperiodcentered\, PEU-CD 2026}
+\newcommand{\courseauthor}{Alexander Quispe}
+\institute{\courseinstitution}
+\author{\courseauthor}

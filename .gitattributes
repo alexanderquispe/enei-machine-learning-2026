@@ -1,0 +1,5 @@
+# Reference material (lecture notes and problem-set PDFs from other courses) is large
+# and binary; keep it out of the git object store.
+reference/**/*.pdf filter=lfs diff=lfs merge=lfs -text
+reference/**/*.arff filter=lfs diff=lfs merge=lfs -text
+# Our own compiled decks are small enough for plain git.

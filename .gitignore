@@ -1,8 +1,33 @@
+# Python
 __pycache__/
 *.py[cod]
 .venv/
 venv/
 .ipynb_checkpoints/
+
+# LaTeX build artifacts (tectonic writes only the PDF unless asked otherwise)
+*.aux
+*.log
+*.out
+*.nav
+*.snm
+*.toc
+*.vrb
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+
+# Never ship binaries or raw datasets from the reference environments
+*.dll
+*.lib
+*.so
+*-ubyte
+*-ubyte.gz
+**/MNIST/
+
+# OS / editors
 .DS_Store
 ~$*.xlsx
 .vscode/

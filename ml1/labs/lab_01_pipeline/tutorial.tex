@@ -1,0 +1,166 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 1 --- Working Environment and a First End-to-End Pipeline}\\[4pt]
+\large Machine Learning I \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, September 9, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Leave with a working Python environment, a copy of the course repository,
+and a complete supervised-learning pipeline you wrote yourself: data $\to$ split $\to$ fit $\to$ validate
+$\to$ report. Every number in Lecture 1's worked example gets recomputed on the way.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{lab\_01\_student.ipynb} --- the notebook you work in. Cells marked \texttt{\# TODO} are yours.
+  \item \texttt{lab\_01\_solution.ipynb} --- released after the session.
+  \item Sources: CS 155 Recitation 1 (Python) and Problem Set 1 (bias--variance, SGD).
+\end{itemize}
+
+\section{Environment (20 min)}
+
+\subsection{Option A --- Google Colab}
+Open \url{https://colab.research.google.com}, upload \texttt{lab\_01\_student.ipynb}. Everything needed is
+preinstalled. Runtime $\to$ Change runtime type $\to$ CPU is enough for ML I.
+
+\subsection{Option B --- local}
+\begin{lstlisting}[language=bash]
+python3 -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
+pip install numpy pandas scikit-learn matplotlib jupyter
+jupyter lab
+\end{lstlisting}
+
+\subsection{The repository}
+\begin{lstlisting}[language=bash]
+git lfs install                       # once; the reference PDFs are stored with LFS
+git clone https://github.com/alexanderquispe/enei-machine-learning-2026.git
+cd enei-machine-learning-2026/ml1/labs/lab_01_pipeline
+\end{lstlisting}
+Pull before each session: \texttt{git pull}. You will never need to push.
+
+\section{numpy for Machine Learning (30 min)}
+
+Everything in this course is a matrix computation. Five things to be fluent in:
+\begin{enumerate}[nosep]
+  \item \textbf{Shapes.} \texttt{X.shape} is \texttt{(N, p)}; \texttt{y.shape} is \texttt{(N,)}. A shape mismatch
+        is the most common bug you will write this term.
+  \item \textbf{Matrix product.} \texttt{X.T @ X}, never \texttt{X.T * X} (that is elementwise).
+  \item \textbf{Broadcasting.} \texttt{X - X.mean(axis=0)} subtracts the column means from every row.
+  \item \textbf{Solving, not inverting.} \texttt{np.linalg.solve(A, b)} rather than \texttt{np.linalg.inv(A) @ b}.
+        Same answer, better numerics, and it fails loudly on a singular \texttt{A}.
+  \item \textbf{Randomness.} \texttt{rng = np.random.default\_rng(155)}; then \texttt{rng.normal}, \texttt{rng.permutation}.
+        Seeded, so a result can be reproduced.
+\end{enumerate}
+
+\section{Lecture 1, Recomputed (40 min)}
+
+\subsection{The worked example}
+\begin{task}{Task 1 --- normal equations by hand}
+With $x=(1,2,3,4,5)$ and $y=(2.2,2.8,4.5,3.7,5.5)$, build the design matrix $\vX$ (column of ones first),
+form $\vX\T\vX$ and $\vX\T\vy$, and solve. You must obtain $\hat\vbeta=(1.49,\,0.75)\T$ --- Lecture 1, slide 15.
+\end{task}
+
+\subsection{The hat matrix, numerically}
+\begin{task}{Task 2 --- four properties of $\vH=\vX(\vX\T\vX)\inv\vX\T$}
+Compute $\vH$ ($5\times5$) and verify, to floating-point precision:
+\begin{enumerate}[nosep]
+  \item $\vH\T=\vH$ \hfill (symmetric)
+  \item $\vH\vH=\vH$ \hfill (idempotent)
+  \item $\tr\vH=2=p+1$ \hfill (degrees of freedom)
+  \item $\vX\T(\vy-\vH\vy)=\vzero$ \hfill (residuals orthogonal to the columns)
+\end{enumerate}
+Use \texttt{np.allclose}. Then check that the eigenvalues of $\vH$ are $\{1,1,0,0,0\}$ and explain why
+(Lecture 1, slide 20).
+\end{task}
+
+\subsection{Gradient descent}
+\begin{task}{Task 3 --- implement, then break it}
+Implement gradient descent for $L(\vbeta)=\frac1{2N}\norm{\vy-\vX\vbeta}^2$, starting at $\vbeta=\vzero$.
+\begin{enumerate}[nosep]
+  \item With $\eta=0.05$ and 2000 iterations, confirm convergence to $(1.49,0.75)$.
+  \item Compute $\lambda_{\max}(\vX\T\vX/N)$ and the critical step $2/\lambda_{\max}$. Run with $\eta$ slightly
+        below and slightly above it. Plot $L$ against iteration in both cases.
+  \item Standardize $x$ (subtract mean, divide by standard deviation) and repeat. How does $\lambda_{\max}$ change?
+        How many iterations does convergence take now?
+\end{enumerate}
+\end{task}
+The last item is the practical lesson of the section: \emph{scale your features}. It is the cheapest
+conditioning fix there is.
+
+\section{A Real Pipeline with scikit-learn (50 min)}
+
+The dataset is \texttt{sklearn.datasets.load\_diabetes}: $N=442$ patients, $p=10$ standardized
+covariates, a quantitative disease-progression score as target. It ships with scikit-learn; no download.
+
+\subsection{The protocol}
+\begin{lstlisting}
+from sklearn.model_selection import train_test_split
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=155)
+\end{lstlisting}
+The test set is now sealed. It is opened once, at the very end, to report one number.
+
+\subsection{Baseline and first model}
+\begin{task}{Task 4 --- two numbers to beat}
+\begin{enumerate}[nosep]
+  \item Baseline: predict $\bar y_{\text{train}}$ for everyone. Compute its MSE on the training set.
+        This is the number any model must beat.
+  \item Fit \texttt{LinearRegression} on the training set. Report training MSE and $R^2$.
+        Verify that \texttt{model.coef\_} equals what \texttt{np.linalg.solve} gives on the same data.
+\end{enumerate}
+\end{task}
+
+\subsection{$K$-fold cross-validation, by hand}
+\begin{task}{Task 5 --- write \texttt{kfold\_mse}}
+Write a function that takes $(\vX,\vy,K,\text{model})$, splits the rows into $K$ folds with a seeded
+permutation, trains on $K-1$ folds and evaluates on the held-out one, and returns the $K$ validation MSEs.
+Compare its mean with \texttt{sklearn.model\_selection.cross\_val\_score(..., scoring="neg\_mean\_squared\_error")}.
+They should agree when both use the same fold assignment (\texttt{KFold(K, shuffle=True, random\_state=155)}).
+\end{task}
+
+\subsection{Model selection: the bias--variance picture, for real}
+\begin{task}{Task 6 --- polynomial degree}
+Using \texttt{PolynomialFeatures(degree=d)} for $d=1,2,3$, compute training MSE and 5-fold CV MSE for each.
+Plot both against $d$. Training error must fall monotonically; CV error should rise by $d=2$ or $3$.
+Explain, in one sentence each, which term of the bias--variance decomposition (Lecture 1, slide 41) is
+responsible for each curve's behaviour.
+\end{task}
+
+\subsection{Learning curves}
+\begin{task}{Task 7 --- how much data is enough?}
+For training-set sizes $n\in\{20,40,80,160,320\}$, fit the linear model on the first $n$ training rows
+and record training MSE and validation MSE (on a fixed 20\% validation slice of the training set).
+Plot both against $n$. The gap between the curves is an estimate of the variance term; its closing rate
+tells you whether more data would help this model.
+\end{task}
+
+\subsection{The one number}
+Only now: evaluate the chosen model (degree from Task 6) on \texttt{X\_te}. Report the test MSE. Do not
+go back and change anything afterwards.
+
+\section{Exercises (to submit before Lab 2)}
+\begin{exercise}
+Implement mini-batch SGD for the least-squares loss with batch sizes $B\in\{1,16,442\}$ and a constant
+$\eta$. Plot the loss after each epoch for 30 epochs, all three on one axis. Which one reaches the lowest
+loss? Which one gets close fastest in wall-clock time? Explain both with Lecture 1, slides 35--36.
+\end{exercise}
+\begin{exercise}
+Prove that for a random subset $\mathcal B$ of size $B$ drawn without replacement, the mini-batch
+gradient $\frac1B\sum_{i\in\mathcal B}\nabla\ell_i(\vbeta)$ is an unbiased estimate of $\nabla L(\vbeta)$.
+Then compute its variance in terms of $B$, $N$, and $\Var_i\bigl(\nabla\ell_i(\vbeta)\bigr)$, and check
+that it vanishes at $B=N$.
+\end{exercise}
+\begin{exercise}
+On the diabetes data, add the $\binom{10}{2}=45$ pairwise interaction features. Training $R^2$ goes up.
+Does 5-fold CV $R^2$? Report both, and state what the result says about $N=442$ relative to $p=55$.
+\end{exercise}
+
+\section*{Submission}
+A single notebook, all cells executed top to bottom without error (\emph{Kernel $\to$ Restart \& Run All}),
+uploaded to the course drive before Wednesday, September 16, 18:00.\\ Name it \texttt{lab01\_lastname\_firstname.ipynb}.
+
+\end{document}

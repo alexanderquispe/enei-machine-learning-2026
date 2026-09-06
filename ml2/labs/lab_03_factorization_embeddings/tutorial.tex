@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 3 --- Factorization and Embeddings in Practice}\\[4pt]
+\large Machine Learning II \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, October 21, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Sections 1 and 2 of Homework 3: the SVD and factorization problems on paper,
+matrix factorization by SGD on a panel with missing entries, and word2vec trained from scratch on a small
+corpus --- with the gradients derived before the code runs.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{homework\_3\_student.pdf} / \texttt{homework\_3\_solutions.pdf} --- Sections 1 and 2.
+  \item \texttt{homework\_3\_student.ipynb} / \texttt{homework\_3\_solution.ipynb} --- Parts 1 and 3.
+  \item \texttt{data/dr\_seuss.txt} --- the corpus for word2vec.
+  \item Lectures 4 and 5 of ML II (latent factors, ALS vs.\ SGD, NMF; skip-gram, negative sampling).
+\end{itemize}
+
+\section{SVD and Factorization on Paper (40 min)}
+\begin{task}{Task 1 --- Section 1 of the homework}
+Work Problems 1--6 in order. The ones to be sure of before the code:
+\begin{enumerate}[nosep]
+  \item $(\vA\vB)\T=\vB\T\vA\T$ and its extension to three factors (Problem 1).
+  \item $\vX\T\vX=\vV\vD^2\vV\T$ from the SVD, and why $\vX\T\vX$ is positive semidefinite (Problem 2) --- ML I, Lecture 6.
+  \item The storage count of a rank-$k$ truncation, $k(2N+1)$, and when it beats $N^2$ (Problem 3).
+  \item The SGD gradients of $\tfrac12\sum_{(i,j)\in\Omega}(Y_{ij}-\vu_i\T\vv_j)^2+\tfrac\lambda2(\norm{\vU}_F^2+\norm{\vV}_F^2)$
+        with respect to $\vu_i$ and $\vv_j$ (Problem 4). You will implement exactly these.
+  \item The ALS closed form for one row with $\lambda=0$, $K=1$, and the counterfactual $\hat\tau_{3,2}=2$ (Problem 6).
+\end{enumerate}
+\end{task}
+
+\section{Matrix Factorization by SGD (50 min)}
+\begin{task}{Task 2 --- Part 1 of the notebook, Problem 17(a)--(b)}
+The notebook generates a $20\times12$ panel (firms $\times$ months) of log sales with known rank-2 structure
+plus noise, and masks 25\% of the entries as a staggered treatment. Implement the SGD updates from
+Problem 4 with $\vU,\vV$ initialized uniformly in $[-0.5,0.5]$ and $\eta=0.03$. Sweep $K\in\{1,2,3,5,8,12\}$
+and plot in-sample error $E_{\text{in}}$ (observed entries) and held-out error $E_{\text{out}}$ (masked entries).
+\end{task}
+\begin{task}{Task 3 --- what the curves say}
+$E_{\text{in}}$ falls monotonically in $K$; $E_{\text{out}}$ turns up. Find the $K$ that minimizes $E_{\text{out}}$
+and compare with the true rank. This is the bias--variance trade-off of ML I, Lecture 1, with $K$ as the
+capacity knob and Eckart--Young (ML I, Lecture 6) saying what happens at $K=12$ with no missing entries.
+\end{task}
+\begin{task}{Task 4 --- ALS for comparison}
+Implement one ALS sweep (solve for every $\vu_i$ with $\vV$ fixed, then every $\vv_j$ with $\vU$ fixed; each
+is a ridge regression --- ML I, Lecture 3). Compare with SGD at the same $K$: iterations to converge,
+final $E_{\text{out}}$, wall-clock time.
+\end{task}
+
+\section{Word2vec From Scratch (50 min)}
+\begin{task}{Task 5 --- the gradient first (Section 2, Problem 10)}
+Using $\frac{d}{dz}[-\log\sigma(z)]=\sigma(z)-1$, derive the negative-sampling gradient with respect to the
+centre-word vector and to one negative sample's vector. Count the cost per update: $O((k+1)D)$ against
+$O(WD)$ for the full softmax.
+\end{task}
+\begin{task}{Task 6 --- Part 3 of the notebook, Problem 19}
+\begin{enumerate}[nosep]
+  \item Tokenize \texttt{dr\_seuss.txt}; generate (centre, context) pairs with window 2.
+  \item Train the skip-gram network with negative sampling in torch, $D=16$, 5 negatives, 20 epochs.
+  \item Extract the embedding matrix; list the 30 most similar word pairs by cosine similarity.
+  \item Reflection: which pairs make sense, which are artefacts of a 1{,}500-word corpus, and what would
+        change with a corpus $10^4$ times larger.
+\end{enumerate}
+\end{task}
+\begin{task}{Task 7 --- word2vec is matrix factorization}
+Lecture 5 stated that skip-gram with negative sampling implicitly factorizes the shifted PMI matrix
+(Levy \& Goldberg, 2014). Build the word--context co-occurrence matrix for the corpus, compute
+$\text{PMI}-\log k$, take its rank-16 truncated SVD (ML I, Lecture 6), and compare the nearest-neighbour
+lists with those of Task 6. They will not be identical; note where they agree.
+\end{task}
+
+\section{Exercises (to submit before Lab 4)}
+\begin{exercise}
+Section 2, Problems 7--9 (LLE reconstruction weights and the hierarchical-softmax path length).
+\end{exercise}
+\begin{exercise}
+Regularization sweep for the factorization, Problem 17(d): $\lambda\in\{0,0.01,0.1,1\}$ at the best $K$ and
+at $K=12$. Explain why $\lambda$ matters more at large $K$ using the ridge intuition from ML I.
+\end{exercise}
+
+\section*{Submission}
+Notebook \texttt{lab03\_lastname\_firstname.ipynb} and a PDF of the paper work, before Monday, October 26, 18:00.
+
+\end{document}

@@ -1,0 +1,78 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 2 --- Backpropagation by Hand, and CNNs}\\[4pt]
+\large Machine Learning II \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, October 14, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Finish the theory of Homework 1 (XOR with ReLU, Xavier/He, Adam's bias
+correction), then Homework 2 in full: convolution and pooling by hand, receptive fields, parameter
+counts, and the gradients through a convolutional layer --- each verified against PyTorch.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{homework\_1\_theory.pdf} --- Problems 4--6.
+  \item \texttt{homework\_2\_student.pdf} / \texttt{homework\_2\_solutions.pdf} --- the 13 CNN problems.
+  \item \texttt{homework\_2\_student.ipynb} / \texttt{homework\_2\_solution.ipynb}.
+  \item Lecture 2 of ML II (optimizers, initialization, dropout, batch norm, convolution, receptive field).
+\end{itemize}
+
+\section{Homework 1, Theory (50 min)}
+\begin{task}{Task 1 --- XOR with ReLU (Problem 4)}
+(a) Prove that no network without a hidden layer computes XOR: a single unit is a linear classifier
+and XOR is not linearly separable (ML I, Lecture 2: the perceptron mistake bound needs a margin, and here
+none exists). (b)--(d) Build the minimal ReLU network explicitly and verify all four inputs in numpy.
+\end{task}
+\begin{task}{Task 2 --- Xavier and He (Problem 5)}
+Derive $\Var(z_k)=n_{\text{in}}\Var(w)\Var(x)$ for a linear unit with independent zero-mean weights and
+inputs, hence $\Var(w)=1/n_{\text{in}}$ (Xavier). Redo it for ReLU, where half the pre-activations are
+zeroed, to get $\Var(w)=2/n_{\text{in}}$ (He). Then verify in torch: initialize a 10-layer ReLU network
+both ways, push a batch of $\Ncal(0,1)$ inputs through it, and plot the activation variance per layer.
+\end{task}
+\begin{task}{Task 3 --- Adam's bias correction (Problem 6)}
+Show $\E[\vm_t]=(1-\beta_1^t)\,\vg$ under stationary gradients, hence the correction $\hat\vm_t=\vm_t/(1-\beta_1^t)$.
+Compute the uncorrected bias at $t=1,10,100$ for $\beta_1=0.9$, $\beta_2=0.999$. Then run Exercise 5 of the
+Homework 1 notebook (SGD, momentum, RMSprop, Adam on one problem) and relate the curves to the derivation.
+\end{task}
+
+\section{Homework 2: Convolutions (70 min)}
+\begin{task}{Task 4 --- by hand, then by torch (Problems 1--6)}
+\begin{enumerate}[nosep]
+  \item Parameter count: a fully connected layer from $28\times28$ to $28\times28$ vs.\ one $3\times3$ convolution with 16 filters. Compute both; then read them off \texttt{sum(p.numel() for p in layer.parameters())}.
+  \item $2$-D convolution of a $5\times5$ input with a $3\times3$ kernel, by hand, stride 1, no padding. Check with \texttt{torch.nn.functional.conv2d}. Note that torch computes cross-correlation; flip the kernel to see the difference.
+  \item Output size $\lfloor(n+2p-k)/s\rfloor+1$: verify on four (n, k, s, p) combinations.
+  \item Receptive field: two $3\times3$ convolutions give RF $5$; add a $2\times2$ max-pool (jump 2) and a third convolution; compute the RF and confirm by perturbing one input pixel and seeing which outputs change.
+\end{enumerate}
+\end{task}
+\begin{task}{Task 5 --- pooling and architectures (Problems 7--10)}
+Max vs.\ average pooling on a hand-made $4\times4$ map. LeNet-5's parameter count, layer by layer, matched
+against the torch model. Then Problem 10: show that two stacked $3\times3$ convolutions have the receptive
+field of one $5\times5$ with $18c^2$ instead of $25c^2$ parameters, and one more nonlinearity.
+\end{task}
+\begin{task}{Task 6 --- backpropagation through a convolution (Problems 11--13)}
+Derive $\partial L/\partial\vK$ for a single-channel convolution: it is the cross-correlation of the input
+with the upstream gradient. Implement it in numpy and compare with \texttt{autograd} on a random input.
+Then the two pooling gradients: max-pool routes the gradient to the argmax (sparse); average-pool spreads
+it uniformly (dense). Verify both.
+\end{task}
+
+\section{Exercises (to submit before Lab 3)}
+\begin{exercise}
+The bonus section of the Homework 2 notebook: an end-to-end MNIST CNN. Report test accuracy after 3 epochs
+and the number of parameters; compare with the $\le100$-unit MLP from Lab 1's exercise.
+\end{exercise}
+\begin{exercise}
+Homework 1 notebook, Exercise 6: the dying-ReLU experiment and dropout vs.\ $\ell_2$. Connect the
+$\ell_2$ result to ridge regression (ML I, Lecture 3): what plays the role of $\lambda$?
+\end{exercise}
+
+\section*{Submission}
+Notebook \texttt{lab02\_lastname\_firstname.ipynb} and a PDF of the derivations, before Wednesday, October 21, 18:00.
+
+\end{document}

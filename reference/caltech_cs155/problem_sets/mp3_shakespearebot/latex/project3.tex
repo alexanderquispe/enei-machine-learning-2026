@@ -1,0 +1,327 @@
+\newif\ifshowsolutions
+\showsolutionstrue
+\input{preamble}
+
+\chead{%
+  {\vbox{%
+      \large
+      Machine Learning \& Data Mining \hfill
+      Caltech CS/CNS/EE 155 \hfill \\[1pt]
+      Miniproject 3: Shakespearebot 5000\hfill
+      Released: March 6, 2026 \\
+    }
+  }
+}
+
+\begin{document}
+\pagestyle{fancy}
+
+\section{Overview}
+
+\noindent
+\textbf{Important Note.} The goal of this project is \emph{not} to produce perfect results.
+You will \textbf{not} be graded on the aesthetic quality of the generated text.
+Instead, the goal is to explore how different neural architectures behave when
+trained on the same dataset. Your grade will primarily be based on your analysis,
+discussion of training behavior, and comparisons between models.
+
+\medskip
+
+In this project you will explore neural approaches to generative language modeling
+by training models that generate Shakespearean-style poetry. Shakespeare's sonnets
+provide a structured and stylistically distinctive corpus, making them a useful
+dataset for studying how language models learn patterns in text.
+
+You will train and compare three neural architectures for character-level text generation:
+
+\begin{itemize}
+\item A character-level Long Short-Term Memory (LSTM) recurrent neural network
+\item A transformer language model implemented using nanoGPT and trained from scratch
+\item A pretrained nanoGPT model that is fine-tuned on the Shakespeare corpus
+\end{itemize}
+
+All starter code for these experiments is provided in the accompanying Google
+Colab notebook \\ \url{https://colab.research.google.com/drive/1K0APwKr-NFMWX61cSpfFby_qUqyvZN29?usp=sharing}. The notebook contains the dataset loading, tokenization pipeline,
+training loops, and text sampling utilities needed for all three models. Your
+main goal is therefore to understand how these models work and analyze the
+behavior of the generated text.
+
+The datasets used in this assignment are available on Piazza and include the
+full Shakespeare corpus (approximately 1.1 million characters), the Spenser
+\emph{Amoretti} sonnet collection, the Lampeter corpus, and a syllable dictionary
+that can be useful for additional experiments.
+
+You may work in groups of 2--4 students. In addition to submitting your report
+and code, you must post one generated poem to Piazza.
+
+\section{Introduction}
+
+Modern language models generate text by learning statistical patterns in
+sequences of tokens. In this project we focus on \emph{character-level language
+modeling}, where the model predicts the next character given a sequence of
+previous characters. Although characters are a very small unit of language,
+character-level models are surprisingly powerful and can learn spelling,
+punctuation, word formation, and even aspects of higher-level structure.
+
+In this project you will explore three neural architectures for character-level
+language modeling:
+
+\begin{itemize}
+
+\item \textbf{LSTM (Long Short-Term Memory).} A recurrent neural network that
+processes text sequentially and maintains an internal hidden state representing
+past context.
+
+\item \textbf{Transformer.} A self-attention based architecture that allows each
+token in a sequence to attend directly to earlier tokens.
+
+\item \textbf{nanoGPT.} A lightweight implementation of a GPT-style transformer
+language model that you will train and fine-tune on the Shakespeare corpus.
+
+\end{itemize}
+
+These models learn sequence structure in fundamentally different ways, and
+comparing their behavior will help illustrate the strengths and limitations of
+each architecture.
+\pagebreak
+\section{Pre-processing (15 points)}
+
+The provided Colab notebook uses character-level tokenization. In this setup
+the vocabulary consists of the unique characters appearing in the dataset
+(letters, punctuation, whitespace, etc.). In the provided implementation this
+vocabulary contains approximately 65 unique tokens.
+
+The dataset is first converted into a long sequence of integer token IDs
+corresponding to characters. The data is then split into training and validation
+sets. During training the model receives fixed-length windows of characters
+and learns to predict the next character in the sequence.
+
+Character-level modeling has several advantages for generative poetry tasks.
+First, it avoids the need for a large vocabulary, which simplifies the modeling
+problem. Second, it allows the model to learn spelling and punctuation patterns
+directly. Finally, it naturally supports creative generation of new words and
+stylistic variations.
+
+\begin{solution}
+
+Explain in detail:
+
+\begin{itemize}
+
+\item How character-level tokenization works in the notebook
+
+\item How the training and validation datasets were constructed
+
+\item Why character-level modeling is particularly well suited for poetry generation
+
+\end{itemize}
+
+\end{solution}
+
+\section{Part 1: Character-Level LSTM (20 points)}
+
+In this section you will train a character-level LSTM model to generate
+Shakespearean text.
+
+The LSTM is a type of recurrent neural network designed to address the
+vanishing gradient problem that occurs in standard RNNs. It maintains an
+internal memory state and uses gating mechanisms to determine how information
+should be stored, forgotten, or exposed at each step of the sequence.
+
+The provided notebook implements a multi-layer character-level LSTM
+architecture. Each character is first mapped to an embedding vector, which
+is then processed through stacked LSTM layers. The final hidden state is
+passed through a fully-connected layer followed by a softmax function to
+produce a probability distribution over the next character.
+
+The model is trained to minimize categorical cross-entropy loss between the
+predicted character distribution and the true next character.
+
+Your report should briefly describe the configuration you chose and explain
+any hyperparameters that you experimented with.
+
+When generating text from the model, we often modify the sampling distribution
+using a \emph{temperature parameter}, denoted by $T$. Temperature controls how
+random the generated text will be.
+
+Lower values of $T$ make the model more deterministic and repetitive, while
+higher values of $T$ increase randomness and diversity but may reduce
+coherence.
+\pagebreak
+
+Given logits $z_i$, the temperature-scaled probability of character $i$ is
+
+\[
+P(i) = \frac{\exp(z_i/T)}{\sum_j \exp(z_j/T)}
+\]
+
+\begin{solution}
+
+Explain in detail what model you implemented and what packages were used.
+
+Discuss:
+
+\begin{itemize}
+
+\item What linguistic patterns the LSTM appears to learn
+\item Whether the model maintains coherence across long sequences
+\item The behavior of the training and validation loss curves
+\item What the gap between training and validation loss suggests about generalization
+
+\end{itemize}
+
+\end{solution}
+
+\section{Part 2: Transformer Language Model (nanoGPT) (20 points)}
+
+In this section you will train a transformer-based language model using the
+nanoGPT implementation.
+
+Unlike recurrent networks, transformers process sequences using
+\emph{self-attention}. Self-attention allows each token in a sequence to
+directly attend to earlier tokens within a fixed context window.
+
+This mechanism enables the model to capture long-range relationships between
+words without relying on sequential hidden-state propagation.
+
+The notebook provides a complete nanoGPT implementation. You are \textbf{not
+required to implement the transformer yourself}. Your task is to train the
+model and analyze its behavior.
+
+Possible parameters to experiment with include:
+
+\begin{itemize}
+\item number of transformer layers
+\item number of attention heads
+\item embedding dimension
+\item context window (block size)
+\end{itemize}
+
+\begin{solution}
+
+Discuss the following:
+
+\begin{itemize}
+
+\item How self-attention differs conceptually from recurrent modeling
+\item Why transformer models often have more parameters than LSTMs
+\item Why GPU memory usage increases with embedding dimension and number of layers
+\item Why validation loss may increase while training loss decreases
+\item How the loss curves compare to those of the LSTM model
+
+\end{itemize}
+
+Generate poems using several temperature values and compare them with the
+LSTM outputs.
+
+\end{solution}
+
+\section{Part 3: Pretrained nanoGPT + Fine-Tuning (15 points)}
+
+In this section you will explore the effect of pretraining.
+
+Instead of training a transformer from random initialization, we load a
+pretrained nanoGPT model and fine-tune it on the Shakespeare dataset.
+
+Because the model already contains useful language representations,
+fine-tuning typically converges much faster than training from scratch.
+
+\begin{solution}
+
+Analyze the following:
+
+\begin{itemize}
+
+\item Why pretraining typically lowers validation loss
+\item Why fine-tuning converges faster
+\item Differences in generated text across all three models
+\item Which model produces the most coherent structure
+\item Which model produces the most creative outputs
+
+\end{itemize}
+
+\end{solution}
+
+\section{Comparative Analysis (15 points)}
+
+In this section you will compare the three language models you trained. Your goal is to analyze how the architectural differences between these
+models affect training behavior and the quality of generated text.
+
+First, summarize the models you trained in a comparison table that includes
+the following information:
+
+\begin{itemize}
+
+\item The model architecture
+
+\item Approximate number of parameters
+
+\item Final validation loss
+
+\item Approximate training time
+
+\end{itemize}
+
+An example table format is shown below.
+
+\begin{center}
+\begin{tabular}{lccc}
+\hline
+Model & Parameters & Validation Loss & Training Time \\
+\hline
+LSTM & $\sim$5.4M & $\sim$1.53 & $\sim$6 min \\
+nanoGPT (scratch) & $\sim$10.7M & $\sim$1.48 & $\sim$45 min \\
+Pretrained + FT & $\sim$10.7M & $\sim$1.43 & $\sim$6 min \\
+\hline
+\end{tabular}
+\end{center}
+
+After presenting the table, write a short discussion comparing the models.
+
+\begin{solution}
+
+Discuss the following:
+
+\begin{itemize}
+
+\item How model capacity affects performance and overfitting
+
+\item The relationship between training time and model complexity
+
+\item Why pretraining can significantly improve performance
+
+\item Differences in coherence and creativity in the generated poems
+
+\item Which model you would choose to deploy in practice and why
+
+\end{itemize}
+
+\end{solution}
+
+\section{Additional Goals (10 points)}
+
+In addition to the required experiments, you should explore at least one
+additional modification or experiment.
+
+Examples include:
+
+\begin{itemize}
+
+\item experimenting with different hyperparameters
+\item training on additional poetry datasets
+\item analyzing syllable structure using the provided dictionary
+\item encouraging rhyme structure in generated poems
+\item experimenting with larger context windows
+
+\end{itemize}
+
+In your report briefly describe the experiment you performed and summarize
+what you observed.
+
+\section{Extra Credit (10 EC points)}
+
+Students may explore creative extensions to the poetry generation system.
+Examples include conditioning generation on rhyme patterns, enforcing meter,
+or generating poems with specific themes.
+
+\end{document}

@@ -1,0 +1,138 @@
+\documentclass[11pt]{article}
+\input{../../../style/preamble_article}
+
+\title{\textcolor{blue}{Lab 4 --- Clustering, PCA and the ML I Project}\\[4pt]
+\large Machine Learning I \,\textperiodcentered\, Tutorial}
+\author{Rodrigo Grijalba (teaching assistant) \,\textperiodcentered\, Alexander Quispe (instructor)}
+\date{Wednesday, September 30, 2026 \,\textperiodcentered\, 19:00--22:00}
+
+\begin{document}
+\maketitle
+
+\begin{keypoint}
+\textbf{Goal of the session.} Implement $k$-means and watch its objective fall exactly as Lecture 6's
+proof says it must; verify Ward's merge formula on real clusters; compute principal components two ways
+and confirm they agree; check the variance--reconstruction identity numerically; and close ML I with
+the project.
+\end{keypoint}
+
+\section*{Materials}
+\begin{itemize}[nosep]
+  \item \texttt{lab\_04\_student.ipynb} / \texttt{lab\_04\_solution.ipynb}.
+  \item Sources: CS 155 Problem Set 5 (PCA, SVD, low-rank approximation).
+  \item Data: \texttt{make\_blobs}, \texttt{load\_digits} ($1797\times64$), \texttt{load\_diabetes} --- all bundled.
+\end{itemize}
+
+\section{$k$-Means (40 min)}
+
+\begin{task}{Task 1 --- Lloyd's algorithm, and the lecture example}
+Write \texttt{kmeans(X, mu0, iters)} that alternates the two half-steps of Lecture 6 and records $J$ after
+each. Run it on the six points $A(1,1)$, $B(1.5,2)$, $C(3,3.5)$, $D(5,7)$, $E(3.5,5)$, $F(4.5,5)$ from
+$\vmu_1=A$, $\vmu_2=D$. You must get $J=22$ after the first assignment and $J=9.167$ at convergence, with
+final centroids $(1.833,2.167)$ and $(4.333,5.667)$. Assert that the recorded $J$ sequence is non-increasing.
+\end{task}
+
+\begin{task}{Task 2 --- local minima, and $k$-means++}
+On \texttt{make\_blobs(300, centers=4, cluster\_std=0.9)}, run your \texttt{kmeans} from 50 random
+initializations (centroids drawn from the data) and histogram the final $J$. How many distinct local minima
+do you find? Then implement $k$-means++ seeding (the $D^2$ sampling rule) and repeat. Compare the two histograms
+and the best $J$ from each. Finally confirm \texttt{sklearn.cluster.KMeans} with your best seeds reaches the same $J$.
+\end{task}
+
+\begin{task}{Task 3 --- choosing $K$}
+For $K=1,\dots,10$ on the same data, plot $J$ (elbow) and the mean silhouette
+(\texttt{sklearn.metrics.silhouette\_score}). Do they agree on $K=4$? Then add one far outlier to the data
+and repeat. What happens to the elbow, and why (Lecture 6, ``What $k$-Means Assumes'')?
+\end{task}
+
+\section{Hierarchical Clustering (25 min)}
+
+\begin{task}{Task 4 --- Ward's formula, verified}
+Take two clusters $A$ and $B$ from Task 2's data (any two of the four). Compute the within-cluster sum of
+squares $J$ with them separate and with them merged, and check that the increase equals
+$\frac{n_An_B}{n_A+n_B}\norm{\vmu_A-\vmu_B}^2$ to floating-point precision. Then compute
+\texttt{scipy.cluster.hierarchy.linkage(X, "ward")} and confirm its last merge height, squared, equals the
+$\Delta J$ of merging the final two clusters (scipy reports $\sqrt{2\Delta J}$; check its documentation and
+reconcile the factor).
+\end{task}
+
+\begin{task}{Task 5 --- four linkages, one dendrogram each}
+Draw the dendrograms for single, complete, average and Ward linkage on 40 points from three blobs.
+Cut each at three clusters and compare the partitions to the truth with the adjusted Rand index. Which linkage
+fails, and on what kind of data would it be the right choice?
+\end{task}
+
+\section{PCA (50 min)}
+
+\begin{task}{Task 6 --- two computations, one answer}
+Centre the digits data $\vX$ ($1797\times64$).
+\begin{enumerate}[nosep]
+  \item Eigendecompose $\vS=\vX\T\vX/N$ with \texttt{np.linalg.eigh}; sort descending.
+  \item Compute the thin SVD of $\vX$; verify $\vV$ matches the eigenvectors (up to sign) and $\lambda_j=d_j^2/N$.
+  \item Verify the Ky Fan claim: for $k=5$, $\tr(\vV_k\T\vS\vV_k)=\lambda_1+\dots+\lambda_5$, and it exceeds
+        $\tr(\vW\T\vS\vW)$ for 100 random orthonormal $\vW\in\R^{64\times5}$ (orthonormalize with \texttt{np.linalg.qr}).
+\end{enumerate}
+\end{task}
+
+\begin{task}{Task 7 --- variance $=$ total $-$ reconstruction}
+For $k=1,2,4,8,16,32,64$ compute (i) the mean squared reconstruction error $\frac1N\sum_i\norm{\vx_i-\vV_k\vV_k\T\vx_i}^2$,
+(ii) $\tr\vS-\sum_{j\le k}\lambda_j$. They must agree. Plot the proportion of variance explained against $k$;
+report the smallest $k$ reaching $90\%$.
+\end{task}
+
+\begin{task}{Task 8 --- eigendigits}
+Reshape the first eight principal components to $8\times8$ and display them. Reconstruct one digit with
+$k=1,2,4,8,16,32,64$ components and display the sequence. At which $k$ can you read the digit?
+\end{task}
+
+\begin{task}{Task 9 --- hard vs.\ soft: PCR against ridge}
+On the diabetes data (standardized), compare by 10-fold CV:
+principal-components regression with $k=1,\dots,10$ components, and ridge with $\lambda$ on a log grid.
+Plot both CV curves against effective degrees of freedom ($k$ for PCR; $\sum_jd_j^2/(d_j^2+\lambda)$ for ridge).
+Lecture 6 called PCR a hard threshold and ridge a soft one; which wins here, and by how much?
+\end{task}
+
+\section{The ML I Project (due today, 23:59)}
+
+One dataset, the whole pipeline, a short report. Choose \emph{one}:
+\begin{itemize}[nosep]
+  \item \texttt{load\_breast\_cancer} --- binary classification, $569\times30$.
+  \item \texttt{load\_digits} --- 10-class classification, $1797\times64$.
+  \item \texttt{load\_diabetes} --- regression, $442\times10$.
+  \item The Messidor retinopathy set from CS 155 Set 3, at\\ \texttt{reference/caltech\_cs155/problem\_sets/set3/messidor\_features.arff}.
+\end{itemize}
+
+\begin{task}{Deliverable}
+A notebook and a PDF report of at most 4 pages, containing:
+\begin{enumerate}[nosep]
+  \item \textbf{Setup} --- the task, the loss you are optimizing, the metric you will report, and why they differ if they do.
+        The test split, sealed before anything else.
+  \item \textbf{Baseline} --- the trivial predictor, and its number.
+  \item \textbf{Three models} --- one regularized linear model (ridge/lasso/logistic), one random forest, one
+        gradient-boosting model, each tuned by cross-validation with the search grid stated. Standardization inside folds.
+  \item \textbf{Evaluation} --- the chosen metric on the test set for all four, once. For classification, also a
+        confusion matrix and ROC/AUC; for regression, residual plots.
+  \item \textbf{One derivation} --- pick any result from Lectures 1--6 that your pipeline relies on (the optimism
+        formula, the bagging variance, the soft-threshold rule, \dots) and re-derive it in your own words in half a page.
+  \item \textbf{What you would do next} --- three sentences.
+\end{enumerate}
+\end{task}
+
+\textbf{Rubric} (out of 20): setup and protocol 4, baseline and models 6, evaluation 4, derivation 4, clarity 2.
+A pipeline that touches the test set more than once loses the 4 protocol points, whatever its numbers.
+
+\section{Exercises (optional; not graded)}
+\begin{exercise}
+For standardized 2-D data with correlation $\rho>0$, show that
+\[\vS=\begin{pmatrix}1&\rho\\\rho&1\end{pmatrix}\]
+has eigenvectors $(1,1)/\sqrt2$ and $(1,-1)/\sqrt2$ with eigenvalues $1+\rho$ and $1-\rho$. Verify numerically.
+\end{exercise}
+\begin{exercise}
+Implement power iteration for the top eigenvector of $\vS$: $\vu\leftarrow\vS\vu/\norm{\vS\vu}$. Show that
+the angle to \texttt{eigh}'s answer decays like $(\lambda_2/\lambda_1)^t$ on the digits data.
+\end{exercise}
+
+\section*{Submission}
+Notebook \texttt{lab04\_lastname\_firstname.ipynb}, and the project as\\ \texttt{project\_lastname\_firstname.ipynb} $+$ \texttt{.pdf}, to the course drive before Wednesday, September 30, 23:59.
+
+\end{document}
