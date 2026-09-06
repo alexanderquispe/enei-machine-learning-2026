@@ -184,8 +184,9 @@ Cost $O(N^2\log N)$ in time and $O(N^2)$ in memory for the distance matrix --- f
 \end{frame}
 
 \begin{frame}{Ward's Criterion, Derived}\footnotesize
-\begin{claim}{Merging clusters $A$ and $B$ (sizes $n_A,n_B$, means $\vmu_A,\vmu_B$) increases $J$ by
-$\dfrac{n_An_B}{n_A+n_B}\norm{\vmu_A-\vmu_B}^2$}
+\begin{claim}{Ward's merge cost}
+Merging clusters $A$ and $B$ (sizes $n_A,n_B$, means $\vmu_A,\vmu_B$) increases $J$ by
+$\ \dfrac{n_An_B}{n_A+n_B}\norm{\vmu_A-\vmu_B}^2$.
 \end{claim}
 \begin{derivation}{Proof}
 The merged mean is $\vmu=\frac{n_A\vmu_A+n_B\vmu_B}{n_A+n_B}$. For any set $S$ with mean $\vmu_S$ and any $\vm$,

@@ -62,7 +62,7 @@ Everything in this course is a matrix computation. Five things to be fluent in:
 \subsection{The worked example}
 \begin{task}{Task 1 --- normal equations by hand}
 With $x=(1,2,3,4,5)$ and $y=(2.2,2.8,4.5,3.7,5.5)$, build the design matrix $\vX$ (column of ones first),
-form $\vX\T\vX$ and $\vX\T\vy$, and solve. You must obtain $\hat\vbeta=(1.49,\,0.75)\T$ --- Lecture 1, slide 15.
+form $\vX\T\vX$ and $\vX\T\vy$, and solve. You must obtain $\hat\vbeta=(1.49,\,0.75)\T$ --- Lecture 1, slide 16.
 \end{task}
 
 \subsection{The hat matrix, numerically}
@@ -75,7 +75,7 @@ Compute $\vH$ ($5\times5$) and verify, to floating-point precision:
   \item $\vX\T(\vy-\vH\vy)=\vzero$ \hfill (residuals orthogonal to the columns)
 \end{enumerate}
 Use \texttt{np.allclose}. Then check that the eigenvalues of $\vH$ are $\{1,1,0,0,0\}$ and explain why
-(Lecture 1, slide 20).
+(Lecture 1, slide 23).
 \end{task}
 
 \subsection{Gradient descent}
@@ -126,7 +126,7 @@ They should agree when both use the same fold assignment (\texttt{KFold(K, shuff
 \begin{task}{Task 6 --- polynomial degree}
 Using \texttt{PolynomialFeatures(degree=d)} for $d=1,2,3$, compute training MSE and 5-fold CV MSE for each.
 Plot both against $d$. Training error must fall monotonically; CV error should rise by $d=2$ or $3$.
-Explain, in one sentence each, which term of the bias--variance decomposition (Lecture 1, slide 41) is
+Explain, in one sentence each, which term of the bias--variance decomposition (Lecture 1, slide 42) is
 responsible for each curve's behaviour.
 \end{task}
 
@@ -146,7 +146,7 @@ go back and change anything afterwards.
 \begin{exercise}
 Implement mini-batch SGD for the least-squares loss with batch sizes $B\in\{1,16,442\}$ and a constant
 $\eta$. Plot the loss after each epoch for 30 epochs, all three on one axis. Which one reaches the lowest
-loss? Which one gets close fastest in wall-clock time? Explain both with Lecture 1, slides 35--36.
+loss? Which one gets close fastest in wall-clock time? Explain both with Lecture 1, slides 37--38.
 \end{exercise}
 \begin{exercise}
 Prove that for a random subset $\mathcal B$ of size $B$ drawn without replacement, the mini-batch
