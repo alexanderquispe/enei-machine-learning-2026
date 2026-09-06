@@ -29,11 +29,19 @@ Open \url{https://colab.research.google.com}, upload \texttt{lab\_01\_student.ip
 preinstalled. Runtime $\to$ Change runtime type $\to$ CPU is enough for ML I.
 
 \subsection{Option B --- local}
+Two main options for package managers: \texttt{pip} and \texttt{conda}
+\subsubsection{pip}
 \begin{lstlisting}[language=bash]
 python3 -m venv .venv && source .venv/bin/activate      # Windows: .venv\Scripts\activate
-pip install numpy pandas scikit-learn matplotlib jupyter
+pip install numpy pandas scikit-learn matplotlib jupyter ipykernel
 jupyter lab
 \end{lstlisting}
+
+\subsubsection{conda}
+\begin{lstlisting}[language=bash]
+conda -n venv numpy pandas scikit-learn matplotlib jupyter ipykernel -y && conda activate venv
+\end{lstlisting}
+
 
 \subsection{The repository}
 \begin{lstlisting}[language=bash]
